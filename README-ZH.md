@@ -1,621 +1,148 @@
 # Skills
 
-这是一个用于沉淀、管理和复用个人 Agent Skills 的仓库。
+[English](README.md) | 中文
 
-本仓库主要收集在 AI Agent、Coding Agent、文档生成、代码审查、工具调用、工程规范、上下文管理、Token 优化等场景中可复用的 Skill。每个 Skill 都以独立目录形式组织，包含明确的使用场景、触发条件、执行流程、约束规则和示例说明。
+这里存放我在实际开发中使用的 Agent Skills。每个 Skill 解决一类明确的问题，并把触发条件、执行步骤、约束和检查项放在独立目录中，方便复用和维护。
 
-## 目标
+它不是 prompt 合集。临时 prompt 只需要解决当前问题；Skill 还要说明何时使用、如何执行、做到什么程度，以及遇到例外时如何处理。
 
-本仓库的目标不是简单收集 prompt，而是将可复用的 Agent 能力沉淀为结构化、可维护、可验证的 Skill。
+## 已收录的 Skill
 
-核心目标包括：
+### [Framework-First Coding](framework-first-coding/README-ZH.md)
 
-* 沉淀个人常用 Agent 工作流
-* 统一 Skill 的组织结构和编写规范
-* 提升 Coding Agent 和通用 Agent 的执行稳定性
-* 减少重复 prompt 编写
-* 降低上下文 token 消耗
-* 让 Agent 优先复用工具、框架和已有工程能力
-* 让复杂任务具备明确的执行步骤、边界和失败策略
-* 为后续构建自研 Agent、MCP Agent 或 Agent OS 提供可复用能力模块
+写代码前，先检查项目、框架和现有依赖是否已经提供了合适的能力。能复用就复用；现有方案不合适时，再补充范围尽可能小的实现。
 
-## 什么是 Skill
+适用于新增功能、修复 Bug、重构和代码审查，尤其是这些场景：
 
-在本仓库中，Skill 指的是一组面向特定任务的结构化能力说明。
+- 参数校验、异常处理和权限控制
+- 数据库查询、事务和分页
+- HTTP 请求、文件上传、缓存和定时任务
+- 组件、工具类、SDK 及项目公共封装的复用
 
-一个 Skill 通常包含：
+这个 Skill 并不要求为了复用而复用。已有抽象如果不兼容、已过时、不安全，或者明显增加复杂度，应说明具体原因并选择更合适的实现。
 
-* 适用场景
-* 激活条件
-* 执行流程
-* 输入要求
-* 输出格式
-* 约束规则
-* 工具使用策略
-* 失败处理策略
-* 示例用法
-* 质量检查清单
+核心原则：
 
-Skill 不等同于普通 prompt。普通 prompt 往往是一次性指令，而 Skill 更强调长期复用、工程化组织和稳定执行。
+> 先找已有能力，再写新增代码。
 
-## 仓库结构
-
-推荐目录结构如下：
+## 目录结构
 
 ```text
 skills/
 ├── README.md
-├── framework-first-coding/
-│   ├── SKILL.md
-│   └── README.md
-├── minimal-patch-coding/
-│   ├── SKILL.md
-│   └── README.md
-├── code-review/
-│   ├── SKILL.md
-│   └── README.md
-├── document-generation/
-│   ├── SKILL.md
-│   └── README.md
-├── tool-failure-strategy/
-│   ├── SKILL.md
-│   └── README.md
-└── references/
-    ├── skill-template.md
-    ├── writing-guide.md
-    └── quality-checklist.md
+├── README-ZH.md
+└── framework-first-coding/
+    ├── SKILL.md
+    ├── README.md
+    ├── README-ZH.md
+    └── agents/
+        └── openai.yaml
 ```
 
-其中：
+- `SKILL.md`：Agent 实际读取的规则文件。
+- `README.md` / `README-ZH.md`：面向使用者和维护者的说明。
+- `agents/openai.yaml`：Skill 在 OpenAI 客户端中的展示名称、简介和默认提示词。
 
-* `README.md`：仓库总说明
-* `*/SKILL.md`：Skill 的核心规则文件，供 Agent 使用
-* `*/README.md`：Skill 的人类可读说明，供开发者理解和维护
-* `references/`：通用模板、规范、检查清单和参考资料
+## 使用方式
 
-## 当前已收录 Skill
+把完整的 Skill 目录放到 Agent 或开发工具能够识别的 skills 目录中。不同工具的目录位置和加载方式可能不同，请以对应工具的文档为准。
 
-### Framework-first Coding Skill
-
-目录：
+安装后，可以在任务中直接指定 Skill：
 
 ```text
-framework-first-coding/
+使用 $framework-first-coding 完成这个改动。先检查项目里的现有实现和依赖，只做必要修改，并运行相关测试。
 ```
 
-用途：
+如果使用的工具不支持 Skill，也可以把 `SKILL.md` 作为项目规则或任务上下文使用。不要只复制其中一句原则；执行流程、约束和检查项需要一起保留，否则容易失去原本的边界。
 
-约束 Coding Agent 在实现功能前，优先检查并复用项目已有框架、依赖库、SDK、工具类、公共组件和既有封装，不要直接重新手写已有能力。
+## 新增 Skill
 
-适用场景：
+新增前先确认它解决的是一类会重复出现的问题，而不是某次任务的临时要求。建议按下面的顺序处理：
 
-* 新增接口
-* 修复 Bug
-* 重构代码
-* 接入第三方 API
-* 数据库查询
-* 参数校验
-* 权限处理
-* 文件上传
-* HTTP 调用
-* 日志、缓存、定时任务等通用工程能力
+1. 明确要解决的问题，以及适用和不适用的场景。
+2. 使用小写英文和连字符创建目录，例如 `minimal-patch-coding`。
+3. 编写 `SKILL.md`，把规则写成 Agent 可以直接执行的步骤。
+4. 补充 README，解释用途、使用方式、限制和典型示例。
+5. 如需客户端展示信息，添加对应的 `agents/` 配置。
+6. 用实际任务验证后，在本页登记。
 
-核心原则：
-
-```text
-先找已有能力，再写新增代码。
-```
-
-该 Skill 的主要价值是减少重复造轮子、降低 token 消耗、提高代码一致性和工程可维护性。
-
-## Skill 编写规范
-
-每个 Skill 建议至少包含两个文件：
-
-```text
-skill-name/
-├── SKILL.md
-└── README.md
-```
-
-### SKILL.md
-
-`SKILL.md` 是给 Agent 读取和执行的核心文件，应该尽量清晰、可执行、少废话。
-
-建议结构：
+一个最小的 `SKILL.md` 可以从下面的结构开始：
 
 ```markdown
----
-name: skill-name
-metadata:
-  version: "1.0"
-  category: "category-name"
-description: "One-sentence description of when and why to use this skill."
----
-
-# Skill Name
-
-## Purpose
-
-## When to Use
-
-## Inputs
-
-## Execution Procedure
-
-## Output Requirements
-
-## Constraints
-
-## Tool Usage Rules
-
-## Failure Strategy
-
-## Quality Checklist
-
-## Examples
-```
-
-### README.md
-
-`README.md` 是给人看的说明文件，可以更详细地解释 Skill 的背景、用途、适用场景和示例。
-
-建议结构：
-
-```markdown
-# Skill Name
-
-## Overview
-
-## Why This Skill Exists
-
-## Suitable Use Cases
-
-## How It Works
-
-## Expected Agent Behavior
-
-## Directory Structure
-
-## Usage
-
-## Examples
-
-## Limitations
-
-## Recommended Pairing
-```
-
-## 命名规范
-
-Skill 目录名建议使用小写英文和连字符：
-
-```text
-framework-first-coding
-minimal-patch-coding
-code-review
-security-review
-document-generation
-tool-failure-strategy
-```
-
-不推荐：
-
-```text
-FrameworkFirstCoding
-framework_first_coding
-框架优先编码
-skill1
-my-skill-new
-```
-
-命名原则：
-
-* 简短
-* 明确
-* 可搜索
-* 能体现核心能力
-* 避免过度抽象
-
-## Skill 分类建议
-
-可以按照以下方向组织 Skill：
-
-### Coding Skills
-
-面向代码生成、修改、重构和审查。
-
-示例：
-
-* `framework-first-coding`
-* `minimal-patch-coding`
-* `code-review`
-* `security-review`
-* `test-first-coding`
-* `dependency-inspection`
-* `project-convention-following`
-
-### Agent Skills
-
-面向 Agent 执行流程、工具调用和任务编排。
-
-示例：
-
-* `tool-use-planning`
-* `tool-failure-strategy`
-* `multi-step-task-execution`
-* `human-in-the-loop`
-* `agent-loop-control`
-* `context-compaction`
-
-### Document Skills
-
-面向文档创建、编辑、总结和结构化输出。
-
-示例：
-
-* `document-generation`
-* `technical-report-writing`
-* `research-summary`
-* `docx-processing`
-* `slide-generation`
-* `proposal-writing`
-
-### Retrieval Skills
-
-面向搜索、RAG、证据抽取和知识库问答。
-
-示例：
-
-* `rag-answering`
-* `evidence-based-research`
-* `academic-search`
-* `web-research`
-* `source-grounded-summary`
-
-### Evaluation Skills
-
-面向评测、打分、检查和质量控制。
-
-示例：
-
-* `benchmark-design`
-* `answer-evaluation`
-* `rubric-scoring`
-* `quality-check`
-* `regression-test-analysis`
-
-## 推荐 Skill 模板
-
-新建 Skill 时，可以使用下面的基础模板：
-
-````markdown
 ---
 name: example-skill
-metadata:
-  version: "1.0"
-  category: "general"
-description: "Use this skill when..."
+description: Describe when this skill should be used and what problem it solves.
 ---
 
 # Example Skill
 
-## Purpose
+## Workflow
 
-Describe the purpose of this skill.
-
-## When to Use
-
-Use this skill when:
-
-- Condition 1
-- Condition 2
-- Condition 3
-
-## Inputs
-
-Expected inputs:
-
-- Input 1
-- Input 2
-
-## Execution Procedure
-
-### Step 1: Understand the Task
-
-Clarify the goal, constraints, and expected output.
-
-### Step 2: Inspect Available Context
-
-Check existing files, tools, dependencies, documents, or prior state.
-
-### Step 3: Execute the Task
-
-Follow the defined workflow.
-
-### Step 4: Validate the Result
-
-Check correctness, completeness, safety, and formatting.
-
-## Output Requirements
-
-The output should include:
-
-- Required item 1
-- Required item 2
-- Required item 3
+1. Inspect the relevant context.
+2. Choose an approach based on the evidence.
+3. Make the scoped change.
+4. Verify the result.
 
 ## Constraints
 
-The agent must:
+- Required behavior
+- Prohibited behavior
+- Conditions that require user confirmation
 
-- Constraint 1
-- Constraint 2
+## Completion Check
 
-The agent must not:
-
-- Forbidden behavior 1
-- Forbidden behavior 2
-
-## Failure Strategy
-
-If the task cannot be completed:
-
-1. Explain what failed.
-2. Explain what was attempted.
-3. Provide the best partial result.
-4. Suggest the next safe action.
-
-## Quality Checklist
-
-Before finalizing, check:
-
-- [ ] The task goal is satisfied
-- [ ] The output follows the requested format
-- [ ] No unnecessary implementation is added
-- [ ] Existing tools or context were used properly
-- [ ] Risks and limitations are stated when relevant
-
-## Examples
-
-Example usage:
-
-```text
-Use this skill to...
-````
-
-````
-
-## 设计原则
-
-本仓库中的 Skill 应遵循以下原则。
-
-### 1. 可执行
-
-Skill 不应该只写抽象原则，而应该告诉 Agent：
-
-- 什么时候使用
-- 先做什么
-- 后做什么
-- 什么情况下停止
-- 失败时怎么办
-- 输出应该长什么样
-
-### 2. 可复用
-
-Skill 应该适用于一类任务，而不是只服务于某一次对话。
-
-不推荐：
-
-```text
-帮我这次修复登录接口。
-````
-
-推荐：
-
-```text
-当修复后端接口问题时，先检查路由、请求方法、参数绑定、安全拦截、异常日志和已有项目约定。
+- [ ] The requested outcome is complete
+- [ ] Relevant checks passed
+- [ ] Risks or limitations are stated
 ```
 
-### 3. 可组合
+模板只是起点。章节数量不重要，关键是规则能直接指导执行，并且不会让 Agent 在信息不足时自行补全关键事实。
 
-一个 Skill 可以和其他 Skill 配合使用。
+## 编写要求
 
-例如：
+### 写清楚触发条件
 
-```text
-Framework-first Coding Skill
-+ Minimal Patch Skill
-+ Security Review Skill
-+ Test Verification Skill
-```
+`description` 应该说明“什么情况下使用”，而不只是概括 Skill 的主题。触发范围过宽，会让 Skill 在无关任务中介入；范围过窄，则难以复用。
 
-### 4. 可验证
+### 使用可执行的表述
 
-Skill 应该包含检查清单，让结果可以被验证。
+少写“提高质量”“遵循最佳实践”这类无法检查的要求，改为具体动作，例如：
 
-例如：
+- 修改前搜索相近实现和调用方。
+- 使用 API 前核对项目安装的版本。
+- 先运行与改动直接相关的测试，再决定是否扩大检查范围。
+- 复用失败时，说明现有能力缺少什么。
 
-```text
-- 是否复用了已有框架能力？
-- 是否避免重复实现？
-- 是否遵循项目已有风格？
-- 是否说明了失败原因？
-```
+### 说明边界和例外
 
-### 5. Token 友好
+规则不应只有理想流程，还要覆盖这些问题：
 
-Skill 应该尽量减少无效输出。
+- 哪些操作不能做。
+- 哪些情况需要用户确认。
+- 缺少文件、权限或工具时如何继续。
+- 什么条件下可以偏离默认流程。
+- 怎样判断任务已经完成。
 
-推荐：
+### 让结果可验证
 
-* 明确输出格式
-* 避免长篇背景说明
-* 避免重复解释基础概念
-* 避免输出整份文件
-* 优先输出差异、步骤和最小改动
+检查项应对应实际证据，例如测试结果、编译结果、文件差异或引用来源。不要把“已检查”“质量良好”本身当作验证结果。
 
-## 使用方式
+### 控制篇幅
 
-可以在以下场景中使用本仓库的 Skill：
+只保留会影响决策和执行的内容。背景、原则和示例各写一次即可，避免换一种说法重复同一结论。示例用于说明边界，不需要穷举所有技术栈。
 
-### 作为 Claude Code Skill
+## 提交前检查
 
-将某个 Skill 目录放入 Claude Code 可识别的 skills 目录中。
+- [ ] 名称和目录名清楚、可搜索。
+- [ ] `description` 能支持准确触发。
+- [ ] 执行步骤有明确顺序。
+- [ ] 输入、输出和停止条件没有歧义。
+- [ ] 约束、例外和失败处理已覆盖。
+- [ ] 检查项可以通过实际结果验证。
+- [ ] 没有重复现有 Skill 的职责。
+- [ ] README 与 `SKILL.md` 的行为一致。
+- [ ] 已在至少一个真实任务中试用。
 
-```text
-skills/
-└── framework-first-coding/
-    ├── SKILL.md
-    └── README.md
-```
+## 维护原则
 
-### 作为 Cursor / IDE Rules
-
-将 `SKILL.md` 中的核心规则提取到项目级规则文件中。
-
-例如：
-
-```text
-.cursor/rules/framework-first-coding.mdc
-```
-
-### 作为自研 Agent 的能力模块
-
-在自研 Agent 中，可以将 Skill 作为能力声明或策略模块加载：
-
-```text
-Agent receives task
-→ Match skill by description
-→ Load SKILL.md
-→ Follow execution procedure
-→ Validate with checklist
-```
-
-### 作为 MCP Agent 的工具使用约束
-
-对于支持 MCP 工具调用的 Agent，可以将 Skill 用于约束工具选择、文件读取、代码搜索、编译测试和失败处理策略。
-
-## 维护流程
-
-新增一个 Skill 时，建议按照以下流程：
-
-1. 明确 Skill 要解决的问题
-2. 判断它是否是一类可复用任务
-3. 新建独立目录
-4. 编写 `SKILL.md`
-5. 编写 `README.md`
-6. 添加示例输入和预期输出
-7. 添加质量检查清单
-8. 在仓库根 `README.md` 中登记
-9. 实际使用后根据失败案例迭代
-
-## Skill 质量检查清单
-
-新增或修改 Skill 前，建议检查：
-
-* [ ] 是否有明确名称
-* [ ] 是否有清晰描述
-* [ ] 是否说明了适用场景
-* [ ] 是否说明了不适用场景
-* [ ] 是否有明确执行步骤
-* [ ] 是否有输出要求
-* [ ] 是否有约束规则
-* [ ] 是否有失败策略
-* [ ] 是否有质量检查清单
-* [ ] 是否能减少重复劳动
-* [ ] 是否能降低 Agent 行为不确定性
-* [ ] 是否能与其他 Skill 组合使用
-* [ ] 是否避免了过度复杂的规则
-* [ ] 是否避免了只写空泛原则
-
-## 推荐组合
-
-在真实 Agent 系统中，可以将多个 Skill 组合成完整工作流。
-
-### Coding Agent 推荐组合
-
-```text
-framework-first-coding
-+ minimal-patch-coding
-+ project-convention-following
-+ test-verification
-+ security-review
-```
-
-### Research Agent 推荐组合
-
-```text
-web-research
-+ evidence-based-summary
-+ source-citation
-+ contradiction-check
-+ report-writing
-```
-
-### Document Agent 推荐组合
-
-```text
-document-generation
-+ outline-planning
-+ style-consistency
-+ docx-processing
-+ final-quality-check
-```
-
-### RAG Agent 推荐组合
-
-```text
-retrieval-planning
-+ query-rewriting
-+ evidence-selection
-+ answer-grounding
-+ hallucination-check
-```
-
-## 版本管理
-
-建议每个 Skill 都维护独立版本号。
-
-示例：
-
-```yaml
-metadata:
-  version: "1.0"
-```
-
-版本建议：
-
-* `1.0`：初始可用版本
-* `1.1`：小幅规则调整
-* `1.2`：新增示例或检查项
-* `2.0`：执行流程或设计目标发生明显变化
-
-## 未来计划
-
-后续可以继续补充以下方向：
-
-* Minimal Patch Coding Skill
-* Tool Failure Strategy Skill
-* Dependency Inspection Skill
-* Project Convention Skill
-* Code Review Skill
-* Security Review Skill
-* RAG Answering Skill
-* Evidence-based Research Skill
-* Document Generation Skill
-* Agent Loop Control Skill
-* Context Compaction Skill
-* Human-in-the-loop Skill
-
-## Summary
-
-本仓库用于管理个人积累的 Agent Skills。
-
-它的核心价值是：
-
-```text
-把一次性的 prompt 经验，沉淀成可复用、可组合、可维护、可验证的 Agent 能力模块。
-```
-
-通过持续积累 Skill，可以逐步形成一套个人或团队可复用的 Agent 能力库，为 Coding Agent、Research Agent、Document Agent 和自研 Agent OS 提供稳定的行为基础。
+Skill 应根据实际使用中暴露的问题迭代。修改时优先补足错误决策的原因、缺失的边界或无法验证的步骤，不要因为单个案例不断增加零散规则。改完后再用原任务跑一遍，确认问题确实得到解决。
